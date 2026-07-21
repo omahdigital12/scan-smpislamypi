@@ -1,7 +1,7 @@
 {
-  "name": "SMP Negeri 12 Pekalongan",
+  "name": "SMP Islam YPI Buaran",
   "short_name": "Scan Presensi",
-  "start_url": "https://script.google.com/macros/s/AKfycbxez3rsWMD0r29IRbwydlo8HFcCxmWV5QZCZMUAbHwYaKGgg8TJ1X65UeCvKCpw7Zmw/exec",
+  "start_url": "https://script.google.com/macros/s/AKfycbya9Hcq37H-0PYl94SYJjWhcVrdLD-R7wDPjBLwgkdOAnj2wz1HE-i0abK3Q5_9K5je/exec",
   "display": "standalone",
   "background_color": "#f5f5f5",
   "theme_color": "#1976d2",
