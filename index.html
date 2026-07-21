@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Presensi QR</title>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  
+  <meta name="theme-color" content="#1976d2">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Presensi SMPN 12">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+      background-color: #f8f8f8;
+      text-align: center;
+      overflow-x: hidden;
+      max-width: 100vw;
+      touch-action: manipulation;
+    }
+
+    .judul { /* Tulisan SCAN PRESENSI */
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: black;
+      letter-spacing: 2px;
+      text-shadow: 2px 2px 4px lightgray;
+    }
+
+    .judul span { /* Tuisan SMP NEGERI 12 PEKALONGAN */
+      font-size: 20px;
+      font-weight: bold;
+      color: black;
+      display: block;
+      margin-top: 2px;
+      letter-spacing: 1px;
+      text-shadow: 1px 1px 2px gray;
+    }
+
+
+    #switch-btn {
+      background-color: #007BFF; /* Biru cerah */
+      color: white; /* Warna teks */
+      border: none;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.5rem;
+      font-weight: bold;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #switch-btn:hover {
+      background-color: #0056b3; /* Biru tua saat hover */
+      transform: scale(1.05); /* Efek zoom saat hover */
+    }
+
+    #switch-btn:active {
+      background-color: #004080; /* Lebih gelap saat diklik */
+      transform: scale(0.98);
+    }
+
+    #reader {
+      width: 90vw;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    #status { /* Tuisan Mengirim .... */
+      margin-top: 16px;
+      font-weight: bold;
+      min-height: 24px;
+      font-size: 16px;
+      color: gray;
+    }
+    .status-kecil {
+      font-size: 16px;
+      color: gray;
+    }
+
+    .status-besar { /* Tuisan Presensi Berhasil */
+      font-size: 24px;
+      color: green;
+      font-weight: bold;
+      line-height: 1.6;
+    }
+
+    .status-nama { /* Tuisan Nama dan Kelas  */
+      font-size: 20px;
+      color: black;
+      font-weight: normal;
+      margin-top: 4px;
+      text-align: center;
+    }
+
+    button {
+      padding: 5px 9px;
+      font-size: 0.5rem;
+      margin: 15px auto;
+      display: inline-block;
+      cursor: pointer;
+    }
+
+    body {
+      overscroll-behavior: contain;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    html {
+      overflow: hidden;
+      height: 100%;
+      touch-action: none;
+      -ms-touch-action: none;
+      -webkit-user-drag: none;
+    }
+  </style>
+</head>
+<body>
+  <h2 class="judul">PRESENSI<br /><span>SMP NEGERI 12 PEKALONGAN</span></h2>
+  <button id="switch-btn">Ganti Kamera</button>
+  <div id="reader"></div>
+  <div id="status">Memuat kamera...</div>
+  <audio id="audio-success" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" preload="auto"></audio>
+  <audio id="audio-fail" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg" preload="auto"></audio>
+
+  <script>
+    const scanner = new Html5Qrcode("reader");
+    let cameraList = [];
+    let currentCameraIndex = 0;
+
+    async function startCamera() {
+      try {
+        if (cameraList.length === 0) {
+          cameraList = await Html5Qrcode.getCameras();
+          if (cameraList.length === 0) throw "Tidak ada kamera ditemukan.";
+        }
+
+        const cameraId = cameraList[currentCameraIndex].id;
+        scanner.start(
+          cameraId,
+          {
+            fps: 10,
+            qrbox: function(viewfinderWidth, viewfinderHeight) {
+              const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+              const boxSize = Math.floor(minEdge * 0.6);
+              return { width: boxSize, height: boxSize };
+            }
+          },
+          onScanSuccess,
+          (error) => {}
+        ).then(() => {
+          document.getElementById("status").innerText = "Arahkan Kartu Presensi Ke Kamera";
+        }).catch(err => {
+          document.getElementById("status").innerText = "Gagal mulai kamera: " + err;
+        });
+
+      } catch (e) {
+        document.getElementById("status").innerText = "❌ " + e;
+      }
+    }
+
+    function onScanSuccess(qrCodeMessage) {
+      scanner.stop().then(() => {
+        kirimPresensi(qrCodeMessage.trim());
+      });
+    }
+
+    const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxpAE5PhPylHrwNuxE9rGh75ISqISCj6cxVXKVBJnOZcQ3as5RGmR74pXnZoX4zmESH/exec";
+
+    function kirimPresensi(nisn) {
+    
+      document.getElementById("status").innerText = "Mencatat...";
+    
+      fetch(WEBAPP_URL, {
+        method: "POST",
+        body: new URLSearchParams({
+          nisn: nisn
+        })
+      })
+      .then(response => response.json())
+      .then(hasil => {
+    
+        if (hasil.status === "sukses") {
+    
+          document.getElementById("audio-success").play();
+    
+          document.getElementById("status").innerHTML = `
+            <div class="status-besar">Presensi Berhasil ✅</div>
+            <div class="status-nama">Nama: <strong>${hasil.nama}</strong></div>
+            <div class="status-nama">Kelas: <strong>${hasil.kelas}</strong></div>
+          `;
+    
+        } else {
+    
+          document.getElementById("audio-fail").play();
+    
+          document.getElementById("status").innerHTML =
+          "❌ <strong>NISN tidak ditemukan!</strong>";
+    
+        }
+    
+        setTimeout(startCamera,1000);
+    
+      })
+      .catch(err=>{
+          console.log(err);
+          document.getElementById("status").innerHTML =
+          "❌ Gagal mengirim data.";
+          setTimeout(startCamera,1000);
+      });
+    
+    }
+
+    document.getElementById("switch-btn").onclick = function () {
+      if (cameraList.length > 1) {
+        scanner.stop().then(() => {
+          currentCameraIndex = (currentCameraIndex + 1) % cameraList.length;
+          startCamera();
+        }).catch(err => {
+          currentCameraIndex = (currentCameraIndex + 1) % cameraList.length;
+          startCamera();
+        });
+      }
+    };
+
+    window.onload = function () {
+      startCamera();
+    };
+  </script>
+
+</body>
+</html>
