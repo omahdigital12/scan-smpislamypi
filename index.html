@@ -26,6 +26,18 @@
       touch-action: manipulation;
     }
 
+    .logo {
+      text-align: center;
+      margin-top: 15px;
+      margin-bottom: 8px;
+    }
+    
+    .logo img {
+      width: 90px;      /* Sesuaikan ukuran logo */
+      height: 90px;
+      object-fit: contain;
+    }
+
     .judul { /* Tulisan SCAN PRESENSI */
       text-align: center;
       font-size: 24px;
@@ -127,7 +139,10 @@
   </style>
 </head>
 <body>
-  <h2 class="judul">PRESENSI<br /><span>SMP NEGERI 12 PEKALONGAN</span></h2>
+  <div class="logo">
+    <img src="https://drive.google.com/thumbnail?id=10yjnIxLGxljaN5BPUZieHUw0uSenLpoN" alt="Logo Sekolah">
+  </div>
+  <h2 class="judul">PRESENSI<br /><span>SMP ISLAM YPI BUARAN</span></h2>
   <button id="switch-btn">Ganti Kamera</button>
   <div id="reader"></div>
   <div id="status">Memuat kamera...</div>
@@ -176,7 +191,7 @@
       });
     }
 
-    const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxpAE5PhPylHrwNuxE9rGh75ISqISCj6cxVXKVBJnOZcQ3as5RGmR74pXnZoX4zmESH/exec";
+    const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbya9Hcq37H-0PYl94SYJjWhcVrdLD-R7wDPjBLwgkdOAnj2wz1HE-i0abK3Q5_9K5je/exec";
 
     function kirimPresensi(nisn) {
     
